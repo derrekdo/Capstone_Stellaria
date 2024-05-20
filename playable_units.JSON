@@ -1,0 +1,89 @@
+{
+	"units": [
+		{
+			"Name": "Rose",
+			"Class": "Mercenary",
+			"Health": 20,
+			"Attack": 5,
+			"Magic": 1,
+			"Defense": 4,
+			"Resistance": 1,
+			"Speed": 4,
+			"Evasion": 3,
+			"Movement": 4
+			
+		},
+		{
+			"Name": "Wisteria",
+			"Class": "Blademaster",
+			"Health": 25,
+			"Attack": 8,
+			"Magic": 1,
+			"Defense": 5,
+			"Resistance": 3,
+			"Speed": 6,
+			"Evasion": 3,
+			"Movement": 4
+		}
+		
+	],
+	
+	"classes": [
+		{
+			"Class": "Mercenary",
+			"Health": 5,
+			"Attack": 2,
+			"Magic": 2,
+			"Defense": 2,
+			"Resistance": 2,
+			"Speed": 1,
+			"Evasion": 0,
+			"Movement": 1
+			
+		},
+		{
+			"Class": "Blademaster",
+			"Health": 4,
+			"Attack": 5,
+			"Magic": -4,
+			"Defense": 4,
+			"Resistance": 2,
+			"Speed": 3,
+			"Evasion": 2,
+			"Movement": 2
+		},
+		{
+			"Class": "Assassin",
+			"Health": 2,
+			"Attack": 8,
+			"Magic": -4,
+			"Defense": 2,
+			"Resistance": 1,
+			"Speed": 8,
+			"Evasion": 5,
+			"Movement": 3
+		},
+		{
+			"Class": "Archer",
+			"Health": 2,
+			"Attack": 4,
+			"Magic": 0,
+			"Defense": 2,
+			"Resistance": 2,
+			"Speed": 3,
+			"Evasion": 0,
+			"Movement": 2
+		},
+		{
+			"Class": "Mage",
+			"Health": 2,
+			"Attack": 1,
+			"Magic": 5,
+			"Defense": 1,
+			"Resistance": 4,
+			"Speed": 3,
+			"Evasion": 0,
+			"Movement": 1
+		},
+	]
+}
