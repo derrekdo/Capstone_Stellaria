@@ -4,7 +4,6 @@ extends Path2D
 
 #creates a walk_finished signal to know when unit stops moving
 signal walk_finished
-
 export var grid: Resource
 #unit texture
 export var skin: Texture setget set_skin
@@ -14,8 +13,11 @@ export var skin_offset := Vector2.ZERO setget set_skin_offset
 #export var vframe: int = 0 setget set_vframe
 #how fast the unit moves
 export var move_speed := 600.0
+export var unit_name := "Proxy"
+#export var job_class := "Knight"
 #unit movement range
 export var move_range := 6
+export var attack_range := 1
 #units health points
 export var health := 20
 #units attack stat
@@ -27,6 +29,13 @@ export var defense := 3
 #units resistance stat (for magic)
 export var resistance := 6
 
+enum classes {
+	Mercenary, Archer, Sniper, Blademaster, Mage, Sage, Priest, Warlock, Assassin, Rogue,
+	Cavelier, Pegasus_Knight, Villager, Bandit
+}
+enum unit_turn {Player, Enemy}
+export(unit_turn) var turn
+export(classes) var class_type
 #coord of current cell
 var cell := Vector2.ZERO setget set_cell
 var is_selected := false setget set_is_selected
