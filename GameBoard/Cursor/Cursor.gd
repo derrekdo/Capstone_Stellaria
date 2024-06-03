@@ -6,6 +6,7 @@ extends Node2D
 signal accept_pressed(cell)
 #emit signal when cursor moves to new cell
 signal moved(new_cell)
+signal hover(cell)
 
 #grid resource, to allow access to it
 export var grid: Resource
@@ -17,18 +18,19 @@ var cell := Vector2.ZERO setget set_cell
 
 onready var _timer: Timer = $Timer
 
-#TODO: possibly remove teh timer for cursor movement on echo
+#TODO: possibly remove teh timer for cursor movement on echo if i get annoyed
 func _ready() -> void:
 	#intialize timer
 	_timer.wait_time = ui_cooldown
 	#places the cursor at center of the cell 
-	position = grid.calculate_map_position(cell)
+	position = grid.calc_map_position(cell)
 
 #handles interactions with mouse movement/input
 func _unhandled_input(event: InputEvent) -> void:
 	#If the mouse moves, update the node's cell.
 	if event is InputEventMouseMotion:
-		self.cell = grid.calculate_grid_coordinates(event.position)
+		self.cell = grid.calc_grid_coords(event.position)
+		emit_signal("hover", cell)
 	#If hovering over cell and clicking it, interact with it
 	elif event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
 		#emit signal of clicking, with the current cell as argument
@@ -62,13 +64,13 @@ func _draw() -> void:
 #position of the cursor on the grid
 func set_cell(value: Vector2) -> void:
 	#clamp the cell coord to prevent moving out of bounds
-	if not grid.is_within_bounds(value):
+	if not grid.within_bounds(value):
 		cell = grid.clamp(value)
 	else:
 		cell = value
 		
 	#updates the cursors position and emit signal
 	#starts cooldown timer that limits rate which cursor move with a held down key press
-	position = grid.calculate_map_position(cell)
+	position = grid.calc_map_position(cell)
 	emit_signal("moved", cell)
 	_timer.start()
