@@ -15,6 +15,7 @@ var _walkable_cells := []
 var _attackable_cells := []
 var _enemy_cells := []
 var _occupied := false
+var _prev_cell: Vector2
 
 #prepare/wait for child nodes
 onready var _unit_overlay: UnitOverlay = $UnitOverlay
@@ -131,7 +132,9 @@ func _select_unit(cell: Vector2) -> void:
 	
 
 	_active_unit = _units[cell]
-	_active_unit.is_selected = true
+	_active_unit.set_is_selected(true)
+	_unit_info.update_info(_active_unit)
+	_unit_info.display(true)
 	_walkable_cells = get_walkable_cells(_active_unit)
 	_unit_overlay.draw(_walkable_cells)
 	_enemy_overlay.draw(_enemy_cells)
@@ -152,6 +155,7 @@ func _clear_active_unit() -> void:
 	_walkable_cells.clear()
 	_enemy_cells.clear()
 	_attackable_cells.clear()
+	
 
 #moves unit after selecting cell
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
@@ -270,3 +274,11 @@ func _handle_attack(target_cell: Vector2) -> void:
 		print("Target Health", target_unit.health)
 		_clear_active_unit()
 #		_action_menu.hide()
+
+
+func _on_Cursor_hover(cell) -> void:
+	if !_active_unit:
+		if _units.has(cell):
+			_unit_info.display(true)
+		else:
+			_unit_info.display(false)
