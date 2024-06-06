@@ -4,6 +4,7 @@ extends Path2D
 
 #creates a walk_finished signal to know when unit stops moving
 signal walk_finished
+signal unit_death
 export var grid: Resource
 #unit texture
 export var skin: Texture setget set_skin
@@ -14,12 +15,17 @@ export var skin_offset := Vector2.ZERO setget set_skin_offset
 #how fast the unit moves
 export var move_speed := 600.0
 export var unit_name := "Proxy"
+export var level := 1
+export var experience := 0
+var _level_up := 50
+var _exp_value := 5
 #export var job_class := "Knight"
 #unit movement range
 export var move_range := 6
 export var attack_range := 1
 #units health points
-export var health := 20
+export var max_health := 20
+var current_hp := 20
 #units attack stat
 export var attack := 4
 #units magic attack stat
@@ -28,12 +34,39 @@ export var magic := 2
 export var defense := 3
 #units resistance stat (for magic)
 export var resistance := 6
-
+export var hit_rate := 50
+export var crit_rate := 10
+export var evade_rate := 15
+export var crit_evade := 5
 enum classes {
 	Mercenary, Archer, Sniper, Blademaster, Mage, Sage, Priest, Warlock, Assassin, Rogue,
-	Cavelier, Pegasus_Knight, Villager, Bandit
+	Cavelier, Pegasus_Knight, Villager, Thief
 }
-enum unit_turn {Player, Enemy}
+
+var class_dict = {
+	0: "Mercenary",
+	1: "Archer",
+	2: "Sniper",
+	3: "Blademaster",
+	4: "Mage",
+	5: "Sage",
+	6: "Priest",
+	7: "Warlock",
+	8: "Assassin",
+	9: "Rogue",
+	10: "Cavelier",
+	11: "Pegasus Knight",
+	12: "Villager",
+	13: "Thief"
+}
+
+var unit_type = {
+	0: "Player",
+	1: "Enemy",
+	2: "Neutral"
+}
+
+enum unit_turn {Player, Enemy, Neutral}
 export(unit_turn) var turn
 export(classes) var class_type
 #coord of current cell
@@ -52,10 +85,11 @@ func _ready() -> void:
 	#initialize the cell property and snap the unit to the cell's center on the map.
 	self.cell = grid.calc_grid_coords(position)
 	position = grid.calc_map_position(cell)
-
 	#create and update curve resource in the inspector 
 	if not Engine.editor_hint:
 		curve = Curve2D.new()
+
+	
 
 #When active, moves the unit along its curve with the help of the PathFollow2D node.
 func _process(delta: float) -> void:
@@ -70,6 +104,8 @@ func _process(delta: float) -> void:
 		position = grid.calc_map_position(cell)
 		curve.clear_points()
 		emit_signal("walk_finished")
+#	if current_hp <= 0:
+#		play_death()
 
 #Starts movement on the path
 #path is an array of grid coords
@@ -82,6 +118,21 @@ func walk_along(path: PoolVector2Array) -> void:
 		curve.add_point(grid.calc_map_position(point) - position)
 	cell = path[-1]
 	self._is_walking = true
+
+func play_death() -> void:
+#	print("play")
+
+	_anim_player.play("Death")
+#	if !(_anim_player.is_playing()):return
+	emit_signal("unit_death")
+#	print("end")
+	
+func curr_class(key: int) -> String:
+	return class_dict[key]
+#	print(class_dict)
+
+func get_unit_type(key: int) -> String:
+	return unit_type[key]
 
 #prevents coord from being out of bounds when changing the cell
 func set_cell(value: Vector2) -> void:
