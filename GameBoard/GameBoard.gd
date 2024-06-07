@@ -4,6 +4,7 @@ extends Node2D
 const DIRECTIONS = [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]
 const _unit := "res://Units/Unit.tscn"
 const _action_menu_scene := preload("res://ActionMenu.tscn")
+const _unit_scene = preload("res://Units/Unit.tscn")
 #const _unit_info := preload("res://Units/UnitInfo.tscn")
 
 export var grid: Resource
@@ -33,22 +34,25 @@ onready var _unit_path: UnitPath = $UnitPath
 onready var _unit_info: UnitInfo = $UnitInfo
 onready var _target_info: UnitInfo = $TargetInfo
 onready var _ally_info: UnitInfo = $AllyInfo
+onready var _enemy_info: UnitInfo = $EnemyInfo
 onready var _combat_predicton: CombatForecast = $CombatForecast1
 onready var _receiver_predicton: CombatForecast = $CombatForecast2
 onready var _player_phase_ani: PhaseChange = $PlayerPhase
 onready var _enemy_phase_ani: PhaseChange = $EnemyPhase
 
 func _ready() -> void:
+	_spawn_units()
 	_reinitialize()
 	_unit_info.display(false)
 	_target_info.display(false)
 	_ally_info.display(false)
+	_enemy_info.display(false)
 	_combat_predicton.display(false)
 	
+	_random.randomize()
 	_player_phase_ani.set_phase_change(false)
 	_enemy_phase_ani.set_phase_change(false)
 #	_receiver_predicton.display(false)
-	_spawn_units()
 	_change_phase(true)
 #	add_child(_action_menu)
 #	_action_menu.hide()
@@ -69,18 +73,43 @@ func _change_phase(player_phase: bool) -> void:
 	if player_phase:
 		_current_turn = _turn_phase.PLAYER
 		_player_phase_ani.set_phase_change(true)
-		yield(get_tree().create_timer(1.5), "timeout")
+		yield(get_tree().create_timer(3.5), "timeout")
 		_player_phase_ani.set_phase_change(false)
 	else: 
 		_current_turn = _turn_phase.ENEMY
 		_enemy_phase_ani.set_phase_change(true)
-		yield(get_tree().create_timer(1.5), "timeout")
+		yield(get_tree().create_timer(3.5), "timeout")
 		_enemy_phase_ani.set_phase_change(false)
 	_reinitialize()
 		
 #spawn player chars, and enemy reinforcements?
 func _spawn_units() -> void:
-	pass
+	var starting_cells := [Vector2(6,11), Vector2(2,11),Vector2(4,10), Vector2(2,4), Vector2(4,3)]
+	var spawnable_cells := {}
+	for unit_data in _process_JSON():
+		var unit_instance = _unit_scene.instance()
+#		unit_instance.visible(false)
+		unit_instance.update_stats(unit_data)
+		add_child(unit_instance)
+		unit_instance.walk_along([Vector2(0,0), starting_cells[0]])
+		starting_cells.remove(0)
+#		unit_instance.visible(true)
+		
+func _process_JSON() -> Array:
+	var all_unit_data: Array
+	var file_path = "res://Units/playable_units.JSON"
+#	var json_as_txt = FileAccess.get_file_as_string(file)
+#	var json_as_dict = JSON.parse_string(json_as_txt)
+	var file = File.new()
+	if file.open(file_path, file.READ) == OK:
+		var json_txt = file.get_as_text()
+		file.close()
+#		print(json_txt)
+		var json_dict = JSON.parse(json_txt).result
+#		print(json_dict)
+		all_unit_data = json_dict.units
+	return all_unit_data
+	
 #deselect unit
 func _unhandled_input(event: InputEvent) -> void:
 	if _active_unit and event.is_action_pressed("ui_cancel"):
@@ -169,15 +198,18 @@ func _move_unit(new_cell: Vector2) -> void:
 	_units[new_cell] = _active_unit
 	if _active_unit.turn == 0:
 		_player_units.erase(_active_unit.cell)
-		_player_units[new_cell] = _active_unit
+#		_player_units[new_cell] = _active_unit
 	elif _active_unit.turn == 1:
 		_enemy_units.erase(_active_unit.cell)
-		_enemy_units[new_cell] = _active_unit
+#		_enemy_units[new_cell] = _active_unit
 		
+#	if _active_unit.turn == 0:
+#		_player_units.erase(_active_unit.cell)
+#	else: _enemy_units.erase(_active_unit.cell)
 	_deselect_active_unit()
 	_active_unit.walk_along(_unit_path.curr_path)
 	yield(_active_unit, "walk_finished")
-#	_clear_active_unit()
+	_clear_active_unit()
 #	if _occupied:
 #	_show_action_menu(new_cell)
 
@@ -185,8 +217,11 @@ func _move_unit(new_cell: Vector2) -> void:
 func _select_unit(cell: Vector2) -> void:
 	if not _units.has(cell) or _units[cell].turn != _current_turn:
 		return
+	if (_current_turn == _turn_phase.PLAYER and !_player_units.has(cell)) or (_current_turn == _turn_phase.ENEMY and !_enemy_units.has(cell)):
+		return
 	
 	_active_unit = _units[cell]
+	print(_active_unit.class_type)
 	_active_unit.set_is_selected(true)
 	_unit_info.update_info(_active_unit)
 	_unit_info.display(true)
@@ -323,10 +358,13 @@ func _handle_attack(target_cell: Vector2) -> void:
 		
 		if target_unit:
 			_calc_damage(_active_unit, target_unit)
-		if _active_unit.turn == 0:
-			_player_units.erase(_active_unit.cell)
-		else: _enemy_units.erase(_active_unit.cell)
-		_clear_active_unit()
+			if _active_unit and _active_unit.speed >= target_unit.speed * 2:
+				print("outspeed")
+				_calc_damage(target_unit, _active_unit)
+#		if _active_unit.turn == 0:
+#			_player_units.erase(_active_unit.cell)
+#		else: _enemy_units.erase(_active_unit.cell)
+#		_clear_active_unit()
 #		if(target_unit.current_hp <= 0):
 #
 #			_units.erase(target_unit.cell)
@@ -337,6 +375,7 @@ func _handle_attack(target_cell: Vector2) -> void:
 func _calc_damage(receiving_unit: Unit, attacking_unit: Unit) -> void:
 	if _calc_hit(receiving_unit, attacking_unit):
 		var damage := max(0, attacking_unit.attack - receiving_unit.defense)
+		print("we hit for: " + str(damage))
 		if _calc_crit(receiving_unit, attacking_unit):
 			damage = damage * 2
 		receiving_unit.current_hp -= damage
@@ -350,13 +389,18 @@ func _calc_damage(receiving_unit: Unit, attacking_unit: Unit) -> void:
 			else:
 				_enemy_units.erase(receiving_unit.cell)
 			remove_child(receiving_unit)
+	else: print("miss")
+
 	
 func _calc_hit(receiving_unit: Unit, attacking_unit) -> bool:
 	var ran_num = _random.randf_range(0.0,100.0)
-#	print(ran_num)
+	print(ran_num)
 	if ran_num <= attacking_unit.hit_rate - receiving_unit.evade_rate:
 		return true
 	return false
+	
+func _calc_double(receiving_unit: Unit, attacking_unit: Unit) -> void:
+	pass
 
 func _calc_crit(receiving_unit: Unit, attacking_unit) -> bool:
 	var ran_num = _random.randf_range(0.0, 100.0)
@@ -368,33 +412,33 @@ func _calc_crit(receiving_unit: Unit, attacking_unit) -> bool:
 func _on_Cursor_hover(cell) -> void:
 	if !_active_unit:
 		if _units.has(cell):
-			_unit_info.update_info(_units[cell])
-			_unit_info.display(true)
-#			_target_info.display(false)
+			if _current_turn == _units[cell].turn:
+				_unit_info.update_info(_units[cell])
+				_unit_info.display(true)
+				_enemy_info.display(false)
+			else:
+				_enemy_info.update_info(_units[cell])
+				_enemy_info.display(true)
 			_ally_info.display(false)
 			_combat_forecast_display(false)
-#			_combat_predicton.display(false)
+
 		else:
 			_unit_info.display(false)
-			_ally_info.display(false)
+			_enemy_info.display(false)
 			_combat_forecast_display(false)
-#			_target_info.display(false)
-#			_combat_predicton.display(false)
 	elif _active_unit:
 		if _units.has(cell) and cell != _active_unit.cell:
 			if _active_unit.turn != _units[cell].turn:
+				_ally_info.display(false)
 				_target_info.update_info(_units[cell])
-#				_target_info.display(true)
 				_combat_predicton._predict_outcome(_active_unit, _units[cell])
-#				_combat_predicton.display(true)
 				_combat_forecast_display(true)
 			else:
 				_ally_info.update_info(_units[cell])
 				_ally_info.display(true)
+				_combat_forecast_display(false)
 		else:
-#			_target_info.display(false)
 			_ally_info.display(false)
-#			_combat_predicton.display(false)
 			_combat_forecast_display(false)
 
 func _combat_forecast_display(visible: bool) -> void:
