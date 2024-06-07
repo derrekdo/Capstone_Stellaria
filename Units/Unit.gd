@@ -25,9 +25,10 @@ export var move_range := 6
 export var attack_range := 1
 #units health points
 export var max_health := 20
-var current_hp := 20
+var current_hp := max_health
 #units attack stat
 export var attack := 4
+export var speed := 4
 #units magic attack stat
 export var magic := 2
 #units defense stat (for attack)
@@ -89,8 +90,6 @@ func _ready() -> void:
 	if not Engine.editor_hint:
 		curve = Curve2D.new()
 
-	
-
 #When active, moves the unit along its curve with the help of the PathFollow2D node.
 func _process(delta: float) -> void:
 	#PathFollow2D offset property updates and moves the sprites along the curve everyt frame
@@ -104,8 +103,6 @@ func _process(delta: float) -> void:
 		position = grid.calc_map_position(cell)
 		curve.clear_points()
 		emit_signal("walk_finished")
-#	if current_hp <= 0:
-#		play_death()
 
 #Starts movement on the path
 #path is an array of grid coords
@@ -134,6 +131,15 @@ func curr_class(key: int) -> String:
 func get_unit_type(key: int) -> String:
 	return unit_type[key]
 
+func change_class(value: String) -> void:
+	for key in class_dict.keys():
+		if class_dict[key] == value:
+			class_type = key
+			return
+
+func change_team() -> void:
+	turn = unit_turn.Player
+
 #prevents coord from being out of bounds when changing the cell
 func set_cell(value: Vector2) -> void:
 	cell = grid.clamp(value)
@@ -161,3 +167,22 @@ func set_skin_offset(value: Vector2) -> void:
 func _set_is_walking(value: bool) -> void:
 	_is_walking = value
 	set_process(_is_walking)
+
+func update_stats(unit: Dictionary) -> void:
+	unit_name = unit["Name"]
+	change_class(unit["Class"])
+	max_health = unit["Health"]
+	current_hp = max_health
+	attack = unit["Attack"]
+	magic = unit["Magic"]
+	crit_rate = unit["CritRate"]
+	hit_rate = unit["HitRate"]
+	defense = unit["Defense"]
+	resistance = unit["Resistance"]
+	speed = unit["Speed"]
+	evade_rate = unit["Evasion"]
+	crit_evade = unit["CritEvade"]
+	move_range = unit["Movement"]
+	set_skin(load(unit["Skin"]))
+	
+	

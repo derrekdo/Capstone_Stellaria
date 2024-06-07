@@ -71,6 +71,7 @@ self_modulate = Color( 0.501961, 0.6, 1, 0.701961 )
 curve = null
 script = ExtResource( 1 )
 grid = ExtResource( 2 )
+skin_offset = Vector2( 0, 60 )
 
 [node name="PathFollow2D" type="PathFollow2D" parent="."]
 rotate = false
@@ -84,7 +85,7 @@ texture = ExtResource( 3 )
 
 [node name="Sprite" type="Sprite" parent="PathFollow2D"]
 modulate = Color( 1, 1, 1, 0.431373 )
-position = Vector2( 2, 0 )
+position = Vector2( -9, 18 )
 scale = Vector2( 0.24, 0.24 )
 offset = Vector2( -3.8147e-06, -185 )
 
