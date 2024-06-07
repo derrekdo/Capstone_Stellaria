@@ -1,0 +1,151 @@
+{
+	"units": [
+		{
+			"Name": "Rose",
+			"Class": "Cavelier",
+			"Health": 25,
+			"Attack": 9,
+			"Magic": 1,
+			"CritRate": 5,
+			"Defense": 5,
+			"Resistance": 3,
+			"Speed": 5,
+			"Evasion": 2,
+			"CritEvade": 15,
+			"HitRate": 90,
+			"Movement": 6,
+			"Skin": "res://Units/cavelier.png",
+			"Offset": [0,40]
+			
+		},
+		{
+			"Name": "Wisteria",
+			"Class": "Blademaster",
+			"Health": 20,
+			"Attack": 10,
+			"Magic": 1,
+			"CritRate": 15,
+			"Defense": 4,
+			"Resistance": 1,
+			"Speed": 8,
+			"Evasion": 3,
+			"CritEvade": 15,
+			"HitRate": 100,
+			"Movement": 4,
+			"Skin": "res://Units/swordmaster.png",
+			"Offset": [0,40]
+		},
+		{
+			"Name": "Fern",
+			"Class": "Mage",
+			"Health": 15,
+			"Attack": 3,
+			"Magic": 10,
+			"CritRate": 5,
+			"Defense": 4,
+			"Resistance": 5,
+			"Speed": 4,
+			"Evasion": 10,
+			"CritEvade": 0,
+			"HitRate": 100,
+			"Movement": 4,
+			"Skin": "res://Units/mage.png",
+			"Offset": [0,40]
+		},
+		{
+			"Name": "Grover",
+			"Class": "Assassin",
+			"Health": 20,
+			"Attack": 10,
+			"Magic": 1,
+			"CritRate": 75,
+			"Defense": 3,
+			"Resistance": 2,
+			"Speed": 8,
+			"Evasion": 3,
+			"CritEvade": 15,
+			"HitRate": 100,
+			"Movement": 4,
+			"Skin": "res://Units/assassin.png",
+			"Offset": [0,40]
+			
+		},
+		{
+			"Name": "Alder",
+			"Class": "Warlock",
+			"Health": 25,
+			"Attack": 3,
+			"Magic": 7,
+			"CritRate": 5,
+			"Defense": 4,
+			"Resistance": 6,
+			"Speed": 2,
+			"Evasion": 3,
+			"CritEvade": 5,
+			"HitRate": 100,
+			"Movement": 4,
+			"Skin": "res://Units/warlock.png",
+			"Offset": [0,40]
+		}
+		
+	],
+	
+	"classes": [
+		{
+			"Class": "Mercenary",
+			"Health": 5,
+			"Attack": 2,
+			"Magic": 2,
+			"Defense": 2,
+			"Resistance": 2,
+			"Speed": 1,
+			"Evasion": 0,
+			"Movement": 1
+			
+		},
+		{
+			"Class": "Blademaster",
+			"Health": 4,
+			"Attack": 5,
+			"Magic": -4,
+			"Defense": 4,
+			"Resistance": 2,
+			"Speed": 3,
+			"Evasion": 2,
+			"Movement": 2
+		},
+		{
+			"Class": "Assassin",
+			"Health": 2,
+			"Attack": 8,
+			"Magic": -4,
+			"Defense": 2,
+			"Resistance": 1,
+			"Speed": 8,
+			"Evasion": 5,
+			"Movement": 3
+		},
+		{
+			"Class": "Archer",
+			"Health": 2,
+			"Attack": 4,
+			"Magic": 0,
+			"Defense": 2,
+			"Resistance": 2,
+			"Speed": 3,
+			"Evasion": 0,
+			"Movement": 2
+		},
+		{
+			"Class": "Mage",
+			"Health": 2,
+			"Attack": 1,
+			"Magic": 5,
+			"Defense": 1,
+			"Resistance": 4,
+			"Speed": 3,
+			"Evasion": 0,
+			"Movement": 1
+		},
+	]
+}
