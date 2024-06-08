@@ -13,6 +13,8 @@ export var grid: Resource
 #unit coords
 var _units := {}
 var _player_units := {}
+var _keys := []
+var _keys2 := []
 var _enemy_units := {}
 var _active_unit: Unit
 var _walkable_cells := []
@@ -20,7 +22,7 @@ var _attackable_cells := []
 var _enemy_cells := []
 var _occupied := false
 var _prev_cell: Vector2
-
+var _curr_index := 0
 
 #gameplay variables
 var _moved := false
@@ -33,17 +35,20 @@ onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _enemy_overlay: EnemyOverlay = $EnemyOverlay
 onready var _unit_path: UnitPath = $UnitPath
-onready var _unit_info: UnitInfo = $UnitInfo
-onready var _target_info: UnitInfo = $TargetInfo
-onready var _ally_info: UnitInfo = $AllyInfo
-onready var _enemy_info: UnitInfo = $EnemyInfo
-onready var _combat_predicton: CombatForecast = $CombatForecast1
-onready var _receiver_predicton: CombatForecast = $CombatForecast2
-onready var _player_phase_ani: PhaseChange = $PlayerPhase
-onready var _enemy_phase_ani: PhaseChange = $EnemyPhase
-
+onready var _unit_info: UnitInfo = $Camera2D/UnitInfo
+onready var _target_info: UnitInfo = $Camera2D/TargetInfo
+onready var _ally_info: UnitInfo = $Camera2D/AllyInfo
+onready var _enemy_info: UnitInfo = $Camera2D/EnemyInfo
+onready var _combat_predicton: CombatForecast = $Camera2D/CombatForecast1
+#onready var _receiver_predicton: CombatForecast = $CombatForecast2
+onready var _player_phase_ani: PhaseChange = $Camera2D/PlayerPhase
+onready var _enemy_phase_ani: PhaseChange = $Camera2D/EnemyPhase
+onready var _camera_node: Camera2D = $Camera2D
+onready var _cursor: Cursor = $Cursor
 
 func _ready() -> void:
+	_camera_node.current = false
+	_cursor._set_action_menu(true)
 	_spawn_units()
 	_reinitialize()
 	_unit_info.display(false)
@@ -54,7 +59,7 @@ func _ready() -> void:
 	_random.randomize()
 	_player_phase_ani.set_phase_change(false)
 	_enemy_phase_ani.set_phase_change(false)
-	_change_phase(false)
+	_change_phase(true)
 
 func _process(delta: float) -> void:
 	if _current_turn == _turn_phase.PLAYER and _player_units.empty():
@@ -75,6 +80,8 @@ func _change_phase(player_phase: bool) -> void:
 		yield(get_tree().create_timer(3.5), "timeout")
 		_enemy_phase_ani.set_phase_change(false)
 	_reinitialize()
+	_camera_node.current = true
+	_cursor._set_action_menu(false)
 		
 #spawn player chars, and enemy reinforcements?
 func _spawn_units() -> void:
@@ -118,7 +125,9 @@ func _reinitialize() -> void:
 	_units.clear()
 	_player_units.clear()
 	_enemy_units.clear()
-	
+	_keys.clear()
+	_keys2.clear()
+	_curr_index = 0
 	for child in get_children():
 		var unit := child as Unit
 		if not unit:
@@ -126,8 +135,10 @@ func _reinitialize() -> void:
 		_units[unit.cell] = unit
 		if unit.turn == 0:
 			_player_units[unit.cell] = unit
+			_keys.append(unit.cell)
 		if unit.turn == 1:
 			_enemy_units[unit.cell] = unit
+			_keys2.append(unit.cell)
 
 #MABYE TODO:change to recursive to optimize
 #returns array of cells the unit can walk, using the flood fill algorithm
@@ -163,7 +174,6 @@ func _flood_fill(cell: Vector2, max_distance: int) -> Array:
 			if is_occupied(coords) and coords != _active_unit.cell:
 				if !(coords in _enemy_cells):
 					_enemy_cells.append(coords)
-#					print(_enemy_cells)
 				continue
 			if coords in arr:
 				continue
@@ -311,20 +321,24 @@ func _on_action_menu_wait_selected() -> void:
 	pass # Replace with function body.
 
 func _end_unit_turn() ->void:
-	print("remove from selectable")
 	if _active_unit.turn == 0:
-#		print(_player_units)
 		_player_units.erase(_prev_cell)
-#		print(_player_units)
+		_keys.erase(_prev_cell)
 	elif _active_unit.turn == 1:
+		_enemy_units.erase(_prev_cell)
 		_enemy_units.erase(_prev_cell)
 	_clear_active_unit()
 	remove_child(_action_menu)
 	_moved = false
+	_camera_node.current = true
+	_cursor._set_action_menu(false)
+	
 
 func _show_action_menu(cell:Vector2) -> void:
 	var screen_pos = cell_to_screen_pos(cell)
 	_action_menu.show_menu(screen_pos)
+	_camera_node.current = false
+	_cursor._set_action_menu(true)
 	
 func cell_to_screen_pos(cell: Vector2) -> Vector2:
 	var cell_size = Vector2(110,75)
@@ -347,7 +361,6 @@ func _handle_attack(target_cell: Vector2) -> void:
 		if target_unit:
 			_calc_damage(_active_unit, target_unit)
 			if _active_unit and _active_unit.speed >= target_unit.speed * 2:
-				print("outspeed")
 				_calc_damage(target_unit, _active_unit)
 		_end_unit_turn()
 
@@ -364,8 +377,10 @@ func _calc_damage(receiving_unit: Unit, attacking_unit: Unit) -> void:
 			_units.erase(receiving_unit.cell)
 			if receiving_unit.turn == 0:
 				_player_units.erase(receiving_unit.cell)
+				_keys.erase(receiving_unit.cell)
 			else:
 				_enemy_units.erase(receiving_unit.cell)
+				_keys2.erase(receiving_unit.cell)
 			remove_child(receiving_unit)
 	
 func _calc_hit(receiving_unit: Unit, attacking_unit) -> bool:
@@ -415,3 +430,13 @@ func _on_Cursor_hover(cell) -> void:
 func _combat_forecast_display(visible: bool) -> void:
 	_target_info.display(visible)
 	_combat_predicton.display(visible)
+
+
+func _on_Cursor_next_unit() -> void:
+	if _current_turn == _turn_phase.PLAYER:
+		if _curr_index >= _keys.size(): _curr_index = 0
+		_cursor.set_cell(_keys[_curr_index])
+	else:
+		if _curr_index >= _keys2.size(): _curr_index = 0
+		_cursor.set_cell(_keys2[_curr_index])
+	_curr_index += 1
