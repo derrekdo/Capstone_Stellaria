@@ -43,7 +43,11 @@ enum classes {
 	Mercenary, Archer, Sniper, Blademaster, Mage, Sage, Priest, Warlock, Assassin, Rogue,
 	Cavelier, Pegasus_Knight, Villager, Thief
 }
-
+enum attack_type {Physical, Special}
+var attack_type_dict = {
+	0: "Physical",
+	1: "Special"
+}
 var class_dict = {
 	0: "Mercenary",
 	1: "Archer",
@@ -68,6 +72,7 @@ var unit_type = {
 }
 
 enum unit_turn {Player, Enemy, Neutral}
+export(attack_type) var damage_type
 export(unit_turn) var turn
 export(classes) var class_type
 #coord of current cell
@@ -82,7 +87,7 @@ onready var _path_follow: PathFollow2D = $PathFollow2D
 
 func _ready() -> void:
 	set_process(false)
-	
+	current_hp = max_health
 	#initialize the cell property and snap the unit to the cell's center on the map.
 	self.cell = grid.calc_grid_coords(position)
 	position = grid.calc_map_position(cell)
@@ -128,8 +133,17 @@ func curr_class(key: int) -> String:
 	return class_dict[key]
 #	print(class_dict)
 
+
+
 func get_unit_type(key: int) -> String:
 	return unit_type[key]
+
+func change_damage_type(value: String) -> void:
+	for key in attack_type_dict.keys():
+		if attack_type_dict[key] == value:
+			print(unit_name + " " + str(key))
+			damage_type = key
+			return
 
 func change_class(value: String) -> void:
 	for key in class_dict.keys():
@@ -184,5 +198,6 @@ func update_stats(unit: Dictionary) -> void:
 	crit_evade = unit["CritEvade"]
 	move_range = unit["Movement"]
 	set_skin(load(unit["Skin"]))
+	change_damage_type(unit["AttackType"])
 	
 	
