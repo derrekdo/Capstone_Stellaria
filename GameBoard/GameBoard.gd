@@ -33,7 +33,6 @@ onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _enemy_overlay: EnemyOverlay = $EnemyOverlay
 onready var _unit_path: UnitPath = $UnitPath
-#onready var _action_menu := _action_menu_scene.instance()
 onready var _unit_info: UnitInfo = $UnitInfo
 onready var _target_info: UnitInfo = $TargetInfo
 onready var _ally_info: UnitInfo = $AllyInfo
@@ -42,7 +41,7 @@ onready var _combat_predicton: CombatForecast = $CombatForecast1
 onready var _receiver_predicton: CombatForecast = $CombatForecast2
 onready var _player_phase_ani: PhaseChange = $PlayerPhase
 onready var _enemy_phase_ani: PhaseChange = $EnemyPhase
-#onready var _action_menu: ActionMenu = $ActionMenu
+
 
 func _ready() -> void:
 	_spawn_units()
@@ -55,15 +54,7 @@ func _ready() -> void:
 	_random.randomize()
 	_player_phase_ani.set_phase_change(false)
 	_enemy_phase_ani.set_phase_change(false)
-#	_receiver_predicton.display(false)
 	_change_phase(false)
-#	add_child(_action_menu)
-#	_action_menu.hide()
-#	_action_menu.connect("attack_selected", self, "_on_action_menu_attack_selected")
-#	_action_menu.connect("inventory_selected", self, "_on_action_menu_inventory_selected")
-#	_action_menu.connect("recruit_selected", self, "_on_action_menu_recruit_selected")
-#	_action_menu.connect("wait_selected", self, "_on_action_menu_wait_selected")
-#	_action_menu.connect("action_cancelled", self, "_on_action_menu_action_cancelled")
 
 func _process(delta: float) -> void:
 	if _current_turn == _turn_phase.PLAYER and _player_units.empty():
@@ -71,7 +62,7 @@ func _process(delta: float) -> void:
 	elif _current_turn == _turn_phase.ENEMY and _enemy_units.empty():
 		_change_phase(true)
 
-#rework action menu before this and also add queue or some data structure to hold all units of a turn taht empties as their turn goes
+#turn order, swaps which units are playable
 func _change_phase(player_phase: bool) -> void:
 	if player_phase:
 		_current_turn = _turn_phase.PLAYER
@@ -95,20 +86,16 @@ func _spawn_units() -> void:
 		add_child(unit_instance)
 		unit_instance.walk_along([Vector2(0,0), starting_cells[0]])
 		starting_cells.remove(0)
-#		unit_instance.visible(true)
 		
+#read json file
 func _process_JSON() -> Array:
 	var all_unit_data: Array
 	var file_path = "res://Units/playable_units.JSON"
-#	var json_as_txt = FileAccess.get_file_as_string(file)
-#	var json_as_dict = JSON.parse_string(json_as_txt)
 	var file = File.new()
 	if file.open(file_path, file.READ) == OK:
 		var json_txt = file.get_as_text()
 		file.close()
-#		print(json_txt)
 		var json_dict = JSON.parse(json_txt).result
-#		print(json_dict)
 		all_unit_data = json_dict.units
 	return all_unit_data
 	
@@ -117,11 +104,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _active_unit and event.is_action_pressed("ui_cancel"):
 		_deselect_active_unit()
 		_clear_active_unit()
-
-func _get_config_warning() -> String:
-	if not grid:
-		return "missing grid res"
-	return ""
 	
 #check if cell is occupied by unit
 func is_occupied(cell: Vector2) -> bool:
@@ -198,13 +180,6 @@ func _move_unit(new_cell: Vector2) -> void:
 		return
 	_units.erase(_active_unit.cell)
 	_units[new_cell] = _active_unit
-#	if _active_unit.turn == 0:
-#		_player_units.erase(_active_unit.cell)
-#
-#	elif _active_unit.turn == 1:
-#		_enemy_units.erase(_active_unit.cell)
-	
-	
 	_deselect_active_unit()
 	_active_unit.walk_along(_unit_path.curr_path)
 	yield(_active_unit, "walk_finished")
@@ -212,9 +187,7 @@ func _move_unit(new_cell: Vector2) -> void:
 	if !_occupied:
 		_display_action_menu()
 	else: _occupied = false
-#	_clear_active_unit()
-#	if _occupied:
-#	_show_action_menu(new_cell)
+
 
 func _display_action_menu() -> void:
 	add_child(_action_menu)
@@ -233,11 +206,8 @@ func _select_unit(cell: Vector2) -> void:
 		return
 	if (_current_turn == _turn_phase.PLAYER and !_player_units.has(cell)) or (_current_turn == _turn_phase.ENEMY and !_enemy_units.has(cell)):
 		return
-	
 	_active_unit = _units[cell]
 	_prev_cell = cell
-#	print(_active_unit.class_type)
-#	print(_active_unit.damage_type)
 	_active_unit.set_is_selected(true)
 	_unit_info.update_info(_active_unit)
 	_unit_info.display(true)
@@ -269,22 +239,22 @@ func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 	#check if unit is selected
 	if not _active_unit:
 		_select_unit(cell)
+	#choose selected cell
 	elif _active_unit.is_selected:
 		if _occupied:
+			#mvoe and attack
 			_move_unit(closest_cell(cell))
 			_handle_attack(cell)
-#			_occupied = false
-			#MAKE ATTACK HERE
 		else:
+			#move the unit
 			_move_unit(cell)
 	if _moved:
+		#allow attack after moving
 		_handle_attack(cell)
 #updates the path both internally and visually
 func _on_Cursor_moved(new_cell: Vector2) -> void:
 	if _active_unit and _active_unit.is_selected:
 		var target_cell = closest_cell(new_cell)
-#		print("ALL enemy cells ",_enemy_cells)
-#		print("mouse cell ", new_cell)
 		#will draw a path near an enemy if they are hovered
 		if _enemy_cells.has(new_cell):
 			_unit_path.draw(_active_unit.cell, target_cell)
@@ -317,14 +287,6 @@ func closest_cell(cell: Vector2) -> Vector2:
 func _on_action_menu_attack_selected() -> void:
 	print("instance signal attak")
 	_display_range()
-#	_enemy_cells.clear()
-#	_attackable_cells = get_attackable_cells(_active_unit)
-#	if _enemy_cells.empty():
-#		_enemy_overlay.draw(_attackable_cells)
-#	else: _enemy_overlay.draw(_enemy_cells)
-	
-	#Allow clicking the nearby unit to attack
-#	set_process_input(true)
 
 
 func _display_range() -> void:
