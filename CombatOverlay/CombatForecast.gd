@@ -15,9 +15,6 @@ onready var right_damage := $HBoxContainer/PanelContainer2/VBoxContainer/HBoxCon
 onready var right_hit_rate := $HBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer3/HBoxContainer2/VBoxContainer3/HitRate
 onready var right_crit_rate := $HBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer3/HBoxContainer3/VBoxContainer2/CritRate
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
 
 func _predict_outcome(attacker: Unit, receiver: Unit) -> void:
 	left_name_label.text = attacker.unit_name
@@ -40,9 +37,7 @@ func _predict_outcome(attacker: Unit, receiver: Unit) -> void:
 	
 	right_name_label.text = receiver.unit_name
 	right_level.text = str(receiver.level)
-#	damage = receiver.attack - attacker.defense
-#	left_HP.text = str(max(0,attacker.current_hp - damage)) + "/" + str(attacker.max_health)
-#	right_damage.text = str(damage)
+
 
 	if receiver.damage_type == 0:
 		damage = receiver.attack - attacker.defense
@@ -54,5 +49,5 @@ func _predict_outcome(attacker: Unit, receiver: Unit) -> void:
 	right_crit_rate.text = str(receiver.crit_rate - attacker.crit_evade)
 
 func display(view: bool) -> void:
-#	print("here")
+
 	self.visible = view
