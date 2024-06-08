@@ -15,7 +15,7 @@
 			"HitRate": 90,
 			"Movement": 6,
 			"Skin": "res://Units/cavelier.png",
-			"Offset": [0,40]
+			"AttackType": "Physical" 
 			
 		},
 		{
@@ -33,7 +33,7 @@
 			"HitRate": 100,
 			"Movement": 4,
 			"Skin": "res://Units/swordmaster.png",
-			"Offset": [0,40]
+			"AttackType": "Physical"
 		},
 		{
 			"Name": "Fern",
@@ -50,7 +50,7 @@
 			"HitRate": 100,
 			"Movement": 4,
 			"Skin": "res://Units/mage.png",
-			"Offset": [0,40]
+			"AttackType": "Special"
 		},
 		{
 			"Name": "Grover",
@@ -67,7 +67,7 @@
 			"HitRate": 100,
 			"Movement": 4,
 			"Skin": "res://Units/assassin.png",
-			"Offset": [0,40]
+			"AttackType": "Physical"
 			
 		},
 		{
@@ -85,7 +85,7 @@
 			"HitRate": 100,
 			"Movement": 4,
 			"Skin": "res://Units/warlock.png",
-			"Offset": [0,40]
+			"AttackType": "Special"
 		}
 		
 	],
