@@ -22,16 +22,33 @@ func _ready() -> void:
 func _predict_outcome(attacker: Unit, receiver: Unit) -> void:
 	left_name_label.text = attacker.unit_name
 	left_level.text = str(attacker.level)
-	var damage = attacker.attack - receiver.defense
-	right_HP.text = str(max(0,receiver.current_hp - damage)) + "/" + str(attacker.max_health)
-	left_damage.text = str(damage)
-	left_hit_rate.text = str(attacker.hit_rate - receiver.evade_rate)
-	left_crit_rate.text = str(attacker.crit_rate - receiver.crit_evade)
+	var damage
+	if attacker.damage_type == 0:
+		damage = attacker.attack - receiver.defense
+	else: 
+		damage = attacker.magic - receiver.resistance
+	
+	if attacker.speed >= receiver.speed * 2:
+		right_HP.text = str(max(0,receiver.current_hp - damage*2)) + "/" + str(receiver.max_health)
+		left_damage.text = str(damage) + " x2"	
+	else:
+		right_HP.text = str(max(0,receiver.current_hp - damage)) + "/" + str(receiver.max_health) 
+		left_damage.text = str(damage)
+		
+	left_hit_rate.text = str(max(0,attacker.hit_rate - receiver.evade_rate))
+	left_crit_rate.text = str(max(0,attacker.crit_rate - receiver.crit_evade))
 	
 	right_name_label.text = receiver.unit_name
 	right_level.text = str(receiver.level)
-	damage = receiver.attack - attacker.defense
-	left_HP.text = str(max(0,attacker.current_hp - damage)) + "/" + str(receiver.max_health)
+#	damage = receiver.attack - attacker.defense
+#	left_HP.text = str(max(0,attacker.current_hp - damage)) + "/" + str(attacker.max_health)
+#	right_damage.text = str(damage)
+
+	if receiver.damage_type == 0:
+		damage = receiver.attack - attacker.defense
+	else: 
+		damage = receiver.magic - attacker.resistance
+	left_HP.text = str(max(0,attacker.current_hp - damage)) + "/" + str(attacker.max_health)
 	right_damage.text = str(damage)
 	right_hit_rate.text = str(receiver.hit_rate - attacker.evade_rate)
 	right_crit_rate.text = str(receiver.crit_rate - attacker.crit_evade)
