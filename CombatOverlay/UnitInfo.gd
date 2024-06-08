@@ -15,6 +15,7 @@ onready var defense := $PanelContainer/MarginContainer/Information/Stats/Protect
 onready var resist := $PanelContainer/MarginContainer/Information/Stats/Protection/HBoxContainer2/ResistancePoints
 onready var evade := $PanelContainer/MarginContainer/Information/Stats/Protection/HBoxContainer3/EvasionRate
 onready var crit_evade := $PanelContainer/MarginContainer/Information/Stats/Protection/HBoxContainer4/CriticalEvasion
+onready var speed := $PanelContainer/MarginContainer/Information/Stats/Misc/HBoxContainer3/Speed
 onready var move := $PanelContainer/MarginContainer/Information/Stats/Misc/HBoxContainer/MoveRange
 onready var attack_range := $PanelContainer/MarginContainer/Information/Stats/Misc/HBoxContainer2/AttackRange
 
@@ -41,6 +42,7 @@ func update_info(unit: Unit) -> void:
 	resist.text = str(unit.resistance)
 	evade.text = str(unit.evade_rate)
 	crit_evade.text = str(unit.crit_evade)
+	speed.text = str(unit.speed)
 	move.text = str(unit.move_range)
 	attack_range.text = str(unit.attack_range)
 #	print(unit.attack_range)
