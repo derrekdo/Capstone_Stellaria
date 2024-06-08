@@ -75,6 +75,7 @@ enum unit_turn {Player, Enemy, Neutral}
 export(attack_type) var damage_type
 export(unit_turn) var turn
 export(classes) var class_type
+
 #coord of current cell
 var cell := Vector2.ZERO setget set_cell
 var is_selected := false setget set_is_selected
@@ -122,16 +123,13 @@ func walk_along(path: PoolVector2Array) -> void:
 	self._is_walking = true
 
 func play_death() -> void:
-#	print("play")
-
 	_anim_player.play("Death")
-#	if !(_anim_player.is_playing()):return
 	emit_signal("unit_death")
-#	print("end")
+
 	
 func curr_class(key: int) -> String:
 	return class_dict[key]
-#	print(class_dict)
+
 
 
 
