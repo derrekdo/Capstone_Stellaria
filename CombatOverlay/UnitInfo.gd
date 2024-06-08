@@ -24,14 +24,11 @@ var _phase := {
 	1: "Enemy"
 }
 
-func _ready() -> void:
-	pass # Replace with function body.
 
 func update_info(unit: Unit) -> void:
 	name_label.text = unit.unit_name
 	class_label.text = unit.curr_class(unit.class_type)
 	level.text = str(unit.level)
-#	print(unit.turn)
 	turn_label.text = unit.get_unit_type(unit.turn)
 	health.text = str(unit.current_hp) + "/" + str(unit.max_health)
 	attack.text = str(unit.attack)
@@ -45,10 +42,7 @@ func update_info(unit: Unit) -> void:
 	speed.text = str(unit.speed)
 	move.text = str(unit.move_range)
 	attack_range.text = str(unit.attack_range)
-#	print(unit.attack_range)
-	pass
 
 func display(view: bool) -> void:
-#	print("here")
 	self.visible = view
 	

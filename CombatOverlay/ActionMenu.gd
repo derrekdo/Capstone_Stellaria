@@ -19,16 +19,14 @@ func _ready() -> void:
 
 func _attack() -> void:
 	emit_signal("attack_selected")
-#	print("attack")
-	pass
+
 
 func _recruit() -> void:
 	emit_signal("recruit_selected")
-	pass
+
 
 func _wait() ->void:
 	emit_signal("wait_selected")
-	pass
 
 func show_menu(cell: Vector2) -> void:
 	rect_position = cell
