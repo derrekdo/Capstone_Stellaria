@@ -304,7 +304,9 @@ func _display_range() -> void:
 	_attackable_cells = get_attackable_cells(_active_unit)
 	if _enemy_cells.empty():
 		_enemy_overlay.draw(_attackable_cells)
-	else: _enemy_overlay.draw(_enemy_cells)
+	else: 
+		_cursor._set_action_menu(false)
+		_enemy_overlay.draw(_enemy_cells)
 	
 
 func _on_action_menu_inventory_selected() -> void:
