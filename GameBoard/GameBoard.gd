@@ -47,8 +47,7 @@ onready var _camera_node: Camera2D = $Camera2D
 onready var _cursor: Cursor = $Cursor
 
 func _ready() -> void:
-	_camera_node.current = false
-	_cursor._set_action_menu(true)
+	_stop_cursor(true, false)
 	_spawn_units()
 	_reinitialize()
 	_unit_info.display(false)
@@ -67,8 +66,13 @@ func _process(delta: float) -> void:
 	elif _current_turn == _turn_phase.ENEMY and _enemy_units.empty():
 		_change_phase(true)
 
+func _stop_cursor(cursor_move: bool, camera_move: bool) -> void:
+	_camera_node.current = camera_move
+	_cursor._set_action_menu(cursor_move)
+
 #turn order, swaps which units are playable
 func _change_phase(player_phase: bool) -> void:
+	_stop_cursor(true, false)
 	if player_phase:
 		_current_turn = _turn_phase.PLAYER
 		_player_phase_ani.set_phase_change(true)
@@ -80,8 +84,7 @@ func _change_phase(player_phase: bool) -> void:
 		yield(get_tree().create_timer(3.5), "timeout")
 		_enemy_phase_ani.set_phase_change(false)
 	_reinitialize()
-	_camera_node.current = true
-	_cursor._set_action_menu(false)
+	_stop_cursor(false, true)
 		
 #spawn player chars, and enemy reinforcements?
 func _spawn_units() -> void:
@@ -140,47 +143,34 @@ func _reinitialize() -> void:
 			_enemy_units[unit.cell] = unit
 			_keys2.append(unit.cell)
 
-#MABYE TODO:change to recursive to optimize
-#returns array of cells the unit can walk, using the flood fill algorithm
 func _flood_fill(cell: Vector2, max_distance: int) -> Array:
-	#walkable cells
 	var arr := []
-	var stack := [cell]
-	
-	while not stack.empty():
-		var curr = stack.pop_back()
-		#check if the cell is within bounds
-		if not grid.within_bounds(curr):
-			continue
-		#check if cell has been visited
-		if curr in arr:
-			continue
-		#distance between start and current cell
-		var diff: Vector2 = (curr - cell).abs()
-		var distance := int(diff.x + diff.y)
-		#checks if current cell is within the units walking distance
-		if distance == max_distance +1:
-			_attackable_cells.append(curr)
-			continue
-		elif distance > max_distance:
-			continue
-		#add the cell to the array of walable cells (fill in a cell)
-		arr.append(curr)
-		#look at neighbors of current cell and add to stack for next iteration
-		for direction in DIRECTIONS:
-			#the neighbors
-			var coords: Vector2 = curr + direction
-			#check if cell occupied by another unit
-			if is_occupied(coords) and coords != _active_unit.cell:
-				if !(coords in _enemy_cells):
-					_enemy_cells.append(coords)
-				continue
-			if coords in arr:
-				continue
-			#add to stack
-			stack.append(coords)
+	_recursive_flood_fill(cell, cell, max_distance, arr)
 	return arr
-
+	
+func _recursive_flood_fill(start_cell: Vector2, curr_cell: Vector2, max_distance: int, arr: Array) -> void:
+	if not grid.within_bounds(curr_cell):
+		return
+	if curr_cell in arr:
+		return
+	var diff: Vector2 = (curr_cell - start_cell).abs()
+	var distance := int(diff.x + diff.y)
+	if distance == max_distance + 1:
+		_attackable_cells.append(curr_cell)
+		return
+	elif distance > max_distance:
+		return
+	arr.append(curr_cell)
+	for direction in DIRECTIONS:
+		var coords: Vector2 = curr_cell + direction
+		if is_occupied(coords) and coords != _active_unit.cell:
+			if !(coords in _enemy_cells):
+				_enemy_cells.append(coords)
+			continue
+		if coords in arr:
+			continue
+		_recursive_flood_fill(start_cell, coords, max_distance, arr)
+	
 #Updates the _units dictionary with the target position for the unit and moves it
 func _move_unit(new_cell: Vector2) -> void:
 	if new_cell == _active_unit.cell:
@@ -192,6 +182,7 @@ func _move_unit(new_cell: Vector2) -> void:
 	_units[new_cell] = _active_unit
 	_deselect_active_unit()
 	_active_unit.walk_along(_unit_path.curr_path)
+	_stop_cursor(true, false)
 	yield(_active_unit, "walk_finished")
 	_moved = true
 	if !_occupied:

@@ -34,8 +34,8 @@ func _input(event: InputEvent) -> void:
 	if action_menu == false:
 		if event.is_action_pressed("ui_focus_next"):
 #			self.cell = grid.calc_grid_coords(event.position)
-			
 			emit_signal("next_unit")
+#			emit_signal("hover")
 		#If hovering over cell and clicking it, interact with it
 		if event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
 			#emit signal of clicking, with the current cell as argument
