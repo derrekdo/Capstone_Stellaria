@@ -2,7 +2,6 @@
 
 Final Capstone Project for North Seattle College Computer Science.
 
-___
 ## Description
 This is a simple implementation of a Strategy Roleplaying Game (SRPG) inspired by Intelligent Systems Fire Emblem series. It is developed Godot game engine and with its built-in scripting language GDScript.
 
